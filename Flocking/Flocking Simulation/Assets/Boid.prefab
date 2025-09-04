@@ -65,6 +65,7 @@ MonoBehaviour:
   - {fileID: -538547896, guid: d97e25a1555e060488d1d15714b501c7, type: 3}
   - {fileID: -2026712587, guid: d97e25a1555e060488d1d15714b501c7, type: 3}
   - {fileID: 1881025467, guid: d97e25a1555e060488d1d15714b501c7, type: 3}
+  fManager: {fileID: 0}
   rb: {fileID: 537929104203517377}
 --- !u!212 &8342428510184351606
 SpriteRenderer:
@@ -126,7 +127,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6843270375052939459}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
