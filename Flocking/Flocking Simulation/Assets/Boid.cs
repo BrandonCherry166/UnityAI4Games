@@ -6,7 +6,7 @@ using UnityEngine;
 public class Boid : MonoBehaviour
 {
     [SerializeField] List<Sprite> sprites;
-    [SerializeField] FlockingManager fManager;
+    public FlockingManager fManager;
     public Rigidbody2D rb;
     // Start is called before the first frame update
     void Start()

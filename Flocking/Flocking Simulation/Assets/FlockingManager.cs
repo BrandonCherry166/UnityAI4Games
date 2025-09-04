@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class FlockingManager : MonoBehaviour
 {
-    [SerializeField] float radius;
+    public float radius;
 
-    [SerializeField] float kCohesion;
-    [SerializeField] float kAlignment;
-    [SerializeField] float kSeparation;
+    public float kCohesion;
+    public float kAlignment;
+    public float kSeparation;
 
-    [SerializeField] float maxForce;
-    [SerializeField] float maxSpeed;
+    public float maxForce;
+    public float maxSpeed;
     public List <Boid> boids;
+
+    [SerializeField] GameObject boidPrefab;
     // Start is called before the first frame update
     void Start()
     {
@@ -29,10 +31,6 @@ public class FlockingManager : MonoBehaviour
             Vector2 separation = ComputeSeparation(i);
 
             Vector2 totalForce = cohesion + alignment + separation;
-            Debug.Log("Force: " + totalForce + " Vel: " + rb.velocity);
-            Debug.Log("Cohesion: " + cohesion);
-            Debug.Log("Alignment: " + alignment);
-            Debug.Log("Separation: " + separation);
             rb.velocity += totalForce * Time.fixedDeltaTime;
 
             if (rb.velocity.magnitude > maxSpeed)
@@ -140,6 +138,23 @@ public class FlockingManager : MonoBehaviour
             totalForce = totalForce.normalized * maxForce;
         }
         return totalForce;
+    }
+
+    public void SpawnBoid()
+    {
+        GameObject newBoid = Instantiate(boidPrefab, Random.insideUnitCircle * 5f, Quaternion.identity);
+        Boid boidcomp = newBoid.GetComponent<Boid>();
+        boidcomp.fManager = this;
+        boids.Add(boidcomp);
+
+    }
+
+    public void RemoveBoid()
+    {
+        if (boids.Count == 0) return;
+        Boid last = boids[boids.Count - 1];
+        boids.RemoveAt(boids.Count - 1);
+        Destroy(last.gameObject);
     }
 
 }
