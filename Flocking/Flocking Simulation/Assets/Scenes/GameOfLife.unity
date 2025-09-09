@@ -529,6 +529,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 832bb3925caadb24e984c90a565fa44c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentState: {fileID: 358639346}
+  newState: {fileID: 1618192310}
+  deadTile: {fileID: 11400000, guid: b011d15504c339b40b66d632981299e4, type: 2}
+  aliveTile: {fileID: 11400000, guid: bf51cd5e822c05e45b08e5e44a8acd4b, type: 2}
+  updateInterval: 0.05
 --- !u!156049354 &1923423950
 Grid:
   m_ObjectHideFlags: 0

@@ -1,18 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class NewBehaviourScript : MonoBehaviour
+using UnityEngine.Tilemaps;
+public class GameBoard : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] private Tilemap currentState;
+    [SerializeField] private Tilemap newState;
+    [SerializeField] private Tile deadTile;
+    [SerializeField] private Tile aliveTile;
+    [SerializeField] private float updateInterval = 0.05f;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }
