@@ -13,7 +13,16 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private float updateInterval = 0.05f;
     [SerializeField] private Pattern pattern;
 
-    private void Start()
+    private HashSet<Vector3Int> aliveCells;
+    private HashSet<Vector3Int> cellsToCheck;
+
+    private void Awake() //Runs First
+    {
+        //Instantiating Hash Sets
+        aliveCells = new HashSet<Vector3Int>();
+        cellsToCheck = new HashSet<Vector3Int>();
+    }
+    private void Start() //Runs Second
     {
         SetPattern(pattern);
     }
@@ -26,8 +35,9 @@ public class GameBoard : MonoBehaviour
 
         for (int i = 0; i < pattern.cells.Length; i++)
         {
-            Vector2Int cell = pattern.cells[i] - center;
-            currentState.SetTile((Vector3Int)cell, aliveTile);
+            Vector3Int cell = (Vector3Int) (pattern.cells[i] - center); //One cast call
+            currentState.SetTile(cell, aliveTile);
+            aliveCells.Add(cell);
         }
     }
 
@@ -55,6 +65,21 @@ public class GameBoard : MonoBehaviour
 
     private void UpdateState()
     {
+        cellsToCheck.Clear();
+        foreach(Vector3Int cell in aliveCells)
+        {
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    cellsToCheck.Add(cell + new Vector3Int(dx, dy, 0));
+                }
+            }
+        }
 
+        foreach (Vector3Int cell in cellsToCheck)
+        {
+
+        }
     }
 }
