@@ -36,4 +36,25 @@ public class GameBoard : MonoBehaviour
         currentState.ClearAllTiles();
         newState.ClearAllTiles();
     }
+
+    private void OnEnable()
+    {
+        StartCoroutine(Simulate());
+    }
+
+    private IEnumerator Simulate()
+    {
+        var interval = new WaitForSeconds(updateInterval); //Done for efficiency of memory  
+        while (enabled)
+        {
+            UpdateState();
+            yield return interval;
+
+        }
+    }
+
+    private void UpdateState()
+    {
+
+    }
 }
