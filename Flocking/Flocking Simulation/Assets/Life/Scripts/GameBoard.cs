@@ -79,7 +79,57 @@ public class GameBoard : MonoBehaviour
 
         foreach (Vector3Int cell in cellsToCheck)
         {
+            int neighbors = CountNeighbors(cell);
+            bool alive = IsAlive(cell);
 
+            if (!alive && neighbors == 3)
+            {
+                newState.SetTile(cell, aliveTile);
+                aliveCells.Add(cell);
+            }
+            else if (alive && (neighbors < 2 || neighbors > 3))
+            {
+                newState.SetTile(cell, deadTile);
+                aliveCells.Remove(cell);
+            }
+            else
+            {
+                newState.SetTile(cell, currentState.GetTile(cell)); 
+            }
         }
+
+        //Temp Swap
+        Tilemap temp = currentState;
+        currentState = newState;
+        newState = temp;
+        newState.ClearAllTiles();
+    }
+
+    private int CountNeighbors(Vector3Int cell)
+    {
+        int count = 0;
+
+        for (int dy = -1; dy <= 1; dy++)
+        {
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                Vector3Int neighbor = cell + new Vector3Int(dx, dy, 0);
+
+                if (dy == 0 && dx == 0)
+                {
+                    continue;
+                }
+                else if (IsAlive(neighbor))
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    private bool IsAlive(Vector3Int cell)
+    {
+        return currentState.GetTile(cell) == aliveTile;
     }
 }
