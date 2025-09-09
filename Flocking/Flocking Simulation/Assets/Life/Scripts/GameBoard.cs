@@ -22,7 +22,7 @@ public class GameBoard : MonoBehaviour
         aliveCells = new HashSet<Vector3Int>();
         cellsToCheck = new HashSet<Vector3Int>();
     }
-    private void Start() //Runs Second
+    public void Begin() //Runs When Called
     {
         SetPattern(pattern);
     }
