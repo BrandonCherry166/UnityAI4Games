@@ -17,18 +17,24 @@ public class MazeGenerator : MonoBehaviour
 
     void DrawMaze(Maze maze)
     {
+        //This is for centering the maze on screen
+        float mazeWidth = maze.width * cellSize;
+        float mazeHeight = maze.height * cellSize;
+        Vector2 offset = new Vector2(-mazeWidth / 2f + cellSize / 2f, -mazeHeight / 2f + cellSize / 2f);
+
         for (int r = 0; r < maze.height; r++)
         {
             for (int c = 0; c < maze.width; c++)
             {
+                Vector3 cellPos = new Vector3(c * cellSize, r * cellSize, 0) + (Vector3)offset;
                 if (r < maze.height - 1 && maze.horizontalWalls[r * maze.width + c])
                 {
-                    Instantiate(wallPrefab, new Vector3(c * cellSize, r * cellSize + cellSize / 2, 0), Quaternion.identity);
+                    Instantiate(wallPrefab, cellPos + new Vector3(0, cellSize / 2, 0), Quaternion.identity);
                 }
 
                 if (c < maze.width - 1 && maze.verticalWalls[r * (maze.width - 1) + c])
                 {
-                    Instantiate(wallPrefab, new Vector3(c * cellSize + cellSize / 2, r * cellSize, 0), Quaternion.Euler(0,0,90));
+                    Instantiate(wallPrefab, cellPos + new Vector3(cellSize / 2, 0, 0), Quaternion.Euler(0,0,90));
                 }
             }
         }
