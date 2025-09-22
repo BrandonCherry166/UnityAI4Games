@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Maze : MonoBehaviour
+public class Maze
 {
     public int width, height;
     public bool[] horizontalWalls;
@@ -11,12 +11,14 @@ public class Maze : MonoBehaviour
 
     private System.Random rng;
 
+    private Stack<(int row, int col)> stack;
+
     public Maze(int w, int h, int seed = -1)
     {
         this.width = w;
         this.height = h;
 
-        horizontalWalls = new bool[(height - -1) * width];
+        horizontalWalls = new bool[(height - 1) * width];
         verticalWalls = new bool[(width - 1) * height];
         visitedCells = new bool[height * width];
 
@@ -107,38 +109,47 @@ public class Maze : MonoBehaviour
         }
     }
 
-    public void Generate()
+    public bool Step() //Modified this file to be step based instead of all at once
     {
-        var stack = new Stack<(int row, int col)>();
-        int row = 0, col = 0;
-        MarkVisited(row, col);
-        stack.Push((row,col));
-
-        while (stack.Count > 0)
+        if (stack == null)
         {
-            (int curRow, int curCol) = stack.Peek();
-            var neighbors = GetVisitableNeighbors(curRow, curCol);
-
-            if (neighbors.Count == 0)
-            {
-                stack.Pop();
-            }
-            else
-            {
-                Neighbor chosen;
-                if (neighbors.Count == 1)
-                {
-                    chosen = neighbors[0];
-                }
-                else
-                {
-                    chosen = neighbors[rng.Next(neighbors.Count)];
-                }
-
-                RemoveWall(curRow, curCol, chosen);
-                MarkVisited(chosen.row, chosen.col);
-                stack.Push((chosen.row, chosen.col));
-            }
+            stack = new Stack<(int row, int col)>();
+            stack.Push((0, 0));
+            MarkVisited(0, 0);
         }
+
+        if (stack.Count == 0)
+        {
+            return false; // Maze Gen Complete
+        }
+
+        (int curRow, int curCol) = stack.Peek();
+        var neighbors = GetVisitableNeighbors(curRow, curCol);
+
+        if (neighbors.Count == 0)
+        {
+            stack.Pop();
+        }
+        else
+        {
+            Neighbor chosen = neighbors.Count == 1 ? neighbors[0] : neighbors[rng.Next(neighbors.Count)];
+            RemoveWall(curRow, curCol, chosen);
+            MarkVisited(chosen.row, chosen.col);
+            stack.Push((chosen.row, chosen.col));
+        }
+        return true;
     }
+
+    public void ResetStep() //Prevent Step from Exploding Itself 
+    {
+        for (int i = 0; i < horizontalWalls.Length; i++) horizontalWalls[i] = true;
+        for (int i = 0; i < verticalWalls.Length; i++) verticalWalls[i] = true;
+
+        for (int i = 0; i < visitedCells.Length; i++) visitedCells[i] = false;
+
+        stack = new Stack<(int row, int col)>();
+        stack.Push((0, 0));
+        MarkVisited(0, 0);
+    }
+
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Neighbor : MonoBehaviour
+public class Neighbor 
 {
     public int row, col;
     public char direction; //U = up, R = right, D = down, L = left
