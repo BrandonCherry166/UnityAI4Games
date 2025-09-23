@@ -38,38 +38,6 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
-
-
-    void DrawMaze()
-    {
-        if (mazeParent != null)
-        {
-            foreach (Transform child in mazeParent)
-                Destroy(child.gameObject);
-        }
-        //Center Maze
-        float mazeWidth = maze.width * cellSize;
-        float mazeHeight = maze.height * cellSize;
-        Vector2 offset = new Vector2(-mazeWidth / 2f + cellSize / 2f, -mazeHeight / 2f + cellSize / 2f);
-
-        for (int r = 0; r < maze.height; r++)
-        {
-            for (int c = 0; c < maze.width; c++)
-            {
-                Vector3 cellPos = new Vector3(c * cellSize, r * cellSize, 0) + (Vector3)offset;
-                if (r < maze.height - 1 && maze.horizontalWalls[r * maze.width + c])
-                {
-                    Instantiate(wallPrefab, cellPos + new Vector3(0, cellSize / 2, 0), Quaternion.identity);
-                }
-
-                if (c < maze.width - 1 && maze.verticalWalls[r * (maze.width - 1) + c])
-                {
-                    Instantiate(wallPrefab, cellPos + new Vector3(cellSize / 2, 0, 0), Quaternion.Euler(0,0,90));
-                }
-            }
-        }
-    }
-
     public bool StepMaze()
     {
         if (maze == null) return false;
@@ -123,6 +91,55 @@ public class MazeGenerator : MonoBehaviour
                     vWallObjects[r, c] = Instantiate(wallPrefab, cellPos + new Vector3(cellSize / 2, 0, 0), Quaternion.Euler(0, 0, 90), mazeParent);
                 } 
             }
+        }
+
+        //Outer Walls Generation
+        for (int c = 0; c < maze.width; c++)
+        {
+            //Top Right Exit
+            if (c == maze.width - 1)
+            {
+                continue;
+            }
+
+            Vector3 topPos = new Vector3(c * cellSize + offsetX, (maze.height - 1) * cellSize + offsetY + cellSize / 2f, 0);
+            Instantiate(wallPrefab, topPos, Quaternion.identity, mazeParent);
+        }
+
+        for (int c = 0; c < maze.width; c++)
+        {
+            //Bottom Left Exit
+            if (c == 0)
+            {
+                continue;
+            }
+
+            Vector3 bottomPos = new Vector3(c * cellSize + offsetX, offsetY - cellSize / 2f, 0);
+            Instantiate(wallPrefab, bottomPos, Quaternion.identity, mazeParent);
+        }
+
+        for (int r = 0; r < maze.height; r++)
+        {
+            //Bottom Left Exit
+            if (r == 0)
+            {
+                continue;
+            }
+
+            Vector3 leftPos = new Vector3(offsetX - cellSize / 2f, r * cellSize + offsetY, 0);
+            Instantiate(wallPrefab, leftPos, Quaternion.Euler(0, 0, 90), mazeParent);
+        }
+
+        for (int r = 0; r < maze.height; r++)
+        {
+            //Top Right Exit
+            if (r == maze.height - 1)
+            {
+                continue;
+            }
+
+            Vector3 rightPos = new Vector3((maze.width - 1) * cellSize + offsetX + cellSize / 2f, r * cellSize + offsetY, 0);
+            Instantiate(wallPrefab, rightPos, Quaternion.Euler(0, 0, 90), mazeParent);
         }
     }
 

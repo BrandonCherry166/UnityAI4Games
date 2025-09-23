@@ -14,8 +14,6 @@ public class MazeDebugUI : MonoBehaviour
 
     public TextMeshProUGUI moveDurationText;
     public TextMeshProUGUI totalDurationText;
-    public TextMeshProUGUI turnDurationText;
-    public TextMeshProUGUI nextTurnInText;
 
     public MazeGenerator mg;
     private float moveTimer = 0.0f;
@@ -67,5 +65,30 @@ public class MazeDebugUI : MonoBehaviour
             mg.ResetMaze(side);
         else
             mg.ResetMaze(10);
+
+        AdjustCamera(side, side, mg.cellSize);
     }
+
+    void AdjustCamera(int width, int height, float cellSize)
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+        {
+            return;
+        }
+
+        //Center
+        cam.transform.position = new Vector3(0, 0, -10);
+
+        float halfWidth = (width * cellSize) / 2f;
+        float halfHeight = (height * cellSize) / 2f;
+
+        float aspect = (float)Screen.width / Screen.height;
+        float sizeX = halfWidth / aspect;
+        float sizeY = halfHeight;
+
+        cam.orthographicSize = Mathf.Max(sizeX, sizeY) + 1f; //padding
+    }
+
+
 }
