@@ -165,40 +165,51 @@ public class GameBoard : MonoBehaviour
     private void UpdateState()
     {
         cellsToCheck.Clear();
-        foreach(Vector3Int cell in aliveCells)
+        foreach (Vector3Int cell in aliveCells)
         {
             for (int dy = -1; dy <= 1; dy++)
             {
                 for (int dx = -1; dx <= 1; dx++)
                 {
-                    cellsToCheck.Add(cell + new Vector3Int(dx, dy, 0));
+                    Vector3Int neighbor = cell + new Vector3Int(dx, dy, 0);
+                    if (InBounds(neighbor))
+                    {
+                        cellsToCheck.Add(neighbor);
+                    }
                 }
             }
         }
 
+        HashSet<Vector3Int> newAlive = new HashSet<Vector3Int>(aliveCells);
+
         foreach (Vector3Int cell in cellsToCheck)
         {
             int neighbors = CountNeighbors(cell);
-            bool alive = IsAlive(cell);
+            bool alive = aliveCells.Contains(cell);
 
             if (!alive && neighbors == 3)
             {
                 newState.SetTile(cell + GridOrigin(), aliveTile);
-                aliveCells.Add(cell);   // keep local coords
+                newAlive.Add(cell);
             }
             else if (alive && (neighbors < 2 || neighbors > 3))
             {
                 newState.SetTile(cell + GridOrigin(), deadTile);
-                aliveCells.Remove(cell);
+                newAlive.Remove(cell);
+            }
+            else if (alive)
+            {
+                newState.SetTile(cell + GridOrigin(), aliveTile);
             }
             else
             {
-                newState.SetTile(cell + GridOrigin(), currentState.GetTile(cell + GridOrigin()));
+                newState.SetTile(cell + GridOrigin(), deadTile);
             }
-
         }
 
-        //Temp Swap
+        aliveCells = newAlive;
+
+        //Swap Tilemaps
         Tilemap temp = currentState;
         currentState = newState;
         newState = temp;
@@ -213,20 +224,29 @@ public class GameBoard : MonoBehaviour
         {
             for (int dx = -1; dx <= 1; dx++)
             {
-                Vector3Int neighbor = Wrap(cell + new Vector3Int(dx,dy,0));
+                if (dx == 0 && dy == 0) continue;
 
-                if (dy == 0 && dx == 0)
+                Vector3Int neighbor = new Vector3Int(cell.x + dx, cell.y + dy, 0);
+
+                if (true) 
+                {
+                    neighbor = Wrap(neighbor);
+                }
+                else if (!InBounds(neighbor))
                 {
                     continue;
                 }
-                else if (IsAlive(neighbor))
+
+                if (aliveCells.Contains(neighbor))
                 {
                     count++;
                 }
             }
         }
+
         return count;
     }
+
 
     private bool IsAlive(Vector3Int cell)
     {
