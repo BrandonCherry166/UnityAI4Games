@@ -13,43 +13,142 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private float updateInterval = 0.05f;
     [SerializeField] private Pattern pattern;
 
+    [SerializeField] int gridWidth;
+    [SerializeField] int gridHeight;
+
     private HashSet<Vector3Int> aliveCells;
     private HashSet<Vector3Int> cellsToCheck;
 
+    private Vector2 cellSize;
+
+    private bool setupMode = true;
     private void Awake() //Runs First
     {
         //Instantiating Hash Sets
         aliveCells = new HashSet<Vector3Int>();
         cellsToCheck = new HashSet<Vector3Int>();
+
+        cellSize = this.GetComponent<Grid>().cellSize;
+        AdjustCamera();
     }
     public void Begin() //Runs When Called
     {
-        SetPattern(pattern);
+        StartCoroutine(Simulate());
+    }
+    private void OnDrawGizmos()
+    {
+        if (cellSize == Vector2.zero) 
+        {
+            cellSize = GetComponent<Grid>().cellSize;
+        }
+
+        Gizmos.color = Color.gray;
+
+        Vector3 origin = new Vector3(
+            -(gridWidth * cellSize.x) / 2f,
+            -(gridHeight * cellSize.y) / 2f,
+            0f
+        );
+
+        for (int x = 0; x <= gridWidth; x++)
+        {
+            Vector3 start = origin + new Vector3(x * cellSize.x, 0, 0);
+            Vector3 end = origin + new Vector3(x * cellSize.x, gridHeight * cellSize.y, 0);
+            Gizmos.DrawLine(start, end);
+        }
+
+        for (int y = 0; y <= gridHeight; y++)
+        {
+            Vector3 start = origin + new Vector3(0, y * cellSize.y, 0);
+            Vector3 end = origin + new Vector3(gridWidth * cellSize.x, y * cellSize.y, 0);
+            Gizmos.DrawLine(start, end);
+        }
     }
 
-    private void SetPattern(Pattern pattern)
+    private Vector3Int GridOrigin()
     {
-        Clear();
-        
-        Vector2Int center = pattern.GetCenter();
+        return new Vector3Int(-gridWidth / 2, -gridHeight / 2, 0);
+    }
 
-        for (int i = 0; i < pattern.cells.Length; i++)
+    private void AdjustCamera()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
+        float gridWorldWidth = gridWidth * cellSize.x;
+        float gridWorldHeight = gridHeight * cellSize.y;
+
+        Vector3 center = new Vector3(0, 0, -10f); 
+        cam.transform.position = center;
+
+        float aspect = cam.aspect;
+        float verticalSize = gridWorldHeight / 2f;
+        float horizontalSize = gridWorldWidth / (2f * aspect);
+
+        cam.orthographicSize = Mathf.Max(verticalSize, horizontalSize);
+    }
+
+
+    private void Update()
+    {
+
+        if (Input.GetMouseButtonDown(0) && setupMode)
         {
-            Vector3Int cell = (Vector3Int) (pattern.cells[i] - center); //One cast call
-            currentState.SetTile(cell, aliveTile);
-            aliveCells.Add(cell);
+            Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3Int cell = currentState.WorldToCell(mouseWorld) - GridOrigin();
+            cell.x = Mathf.Clamp(cell.x, 0, gridWidth - 1);
+            cell.y = Mathf.Clamp(cell.y, 0, gridHeight - 1);
+
+
+            if (InBounds(cell))
+            {
+                if (IsAlive(cell))
+                {
+                    currentState.SetTile(cell + GridOrigin(), deadTile);
+                    aliveCells.Remove(cell);
+                }
+                else
+                {
+                    currentState.SetTile(cell + GridOrigin(), aliveTile);
+                    aliveCells.Add(cell);
+                }
+            }
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            setupMode = !setupMode;
+
+            if (setupMode)
+            {
+                StopAllCoroutines();
+                Clear();
+                
+            }
+            else
+            {
+                Begin();
+            }
+        }
+    }
+
+    private bool InBounds(Vector3Int cell)
+    {
+        return cell.x >= 0 && cell.x < gridWidth &&
+           cell.y >= 0 && cell.y < gridHeight;
+    }
+
+    private Vector3Int Wrap(Vector3Int cell)
+    {
+        int x = (cell.x + gridWidth) % gridWidth;
+        int y = (cell.y + gridHeight) % gridHeight;
+        return new Vector3Int(x, y, 0);
     }
 
     private void Clear()
     {
         currentState.ClearAllTiles();
         newState.ClearAllTiles();
-    }
-
-    private void OnEnable()
-    {
-        StartCoroutine(Simulate());
     }
 
     private IEnumerator Simulate()
@@ -84,18 +183,19 @@ public class GameBoard : MonoBehaviour
 
             if (!alive && neighbors == 3)
             {
-                newState.SetTile(cell, aliveTile);
-                aliveCells.Add(cell);
+                newState.SetTile(cell + GridOrigin(), aliveTile);
+                aliveCells.Add(cell);   // keep local coords
             }
             else if (alive && (neighbors < 2 || neighbors > 3))
             {
-                newState.SetTile(cell, deadTile);
+                newState.SetTile(cell + GridOrigin(), deadTile);
                 aliveCells.Remove(cell);
             }
             else
             {
-                newState.SetTile(cell, currentState.GetTile(cell)); 
+                newState.SetTile(cell + GridOrigin(), currentState.GetTile(cell + GridOrigin()));
             }
+
         }
 
         //Temp Swap
@@ -113,7 +213,7 @@ public class GameBoard : MonoBehaviour
         {
             for (int dx = -1; dx <= 1; dx++)
             {
-                Vector3Int neighbor = cell + new Vector3Int(dx, dy, 0);
+                Vector3Int neighbor = Wrap(cell + new Vector3Int(dx,dy,0));
 
                 if (dy == 0 && dx == 0)
                 {
@@ -130,6 +230,7 @@ public class GameBoard : MonoBehaviour
 
     private bool IsAlive(Vector3Int cell)
     {
-        return currentState.GetTile(cell) == aliveTile;
+        return currentState.GetTile(cell + GridOrigin()) == aliveTile;
     }
+
 }
